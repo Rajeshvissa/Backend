@@ -15,6 +15,7 @@ router.get(
   passport.authenticate("google", { failureRedirect: "/auth/failure", session: true }),
   (req, res) => {
     const FRONTEND = process.env.FRONTEND_URL || "http://localhost:5173";
+    console.log("redirecting to dashboard");
     res.redirect(`${FRONTEND}/dashboard`);
   }
 );
@@ -41,4 +42,5 @@ router.get("/logout", (req, res) => {
 });
 
 export default router;
+
 
