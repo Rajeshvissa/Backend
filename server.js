@@ -1,48 +1,56 @@
-// backend/src/server.js
 import express from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
-import cors from "cors";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import authRoutes from "./routes/auth.js";
 
-const app = express();
+const router = express.Router();
 
-// === CORS ===
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: false, // JWT flow doesn't use cookies
-  })
+// Trigger Google login
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-app.use(express.json());
-app.use(passport.initialize());
+// Google callback
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false, failureRedirect: process.env.FRONTEND_URL }),
+  (req, res) => {
+    console.log("🔹 Google callback user:", req.user);
 
-// === Passport Google Strategy ===
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
-    },
-    (accessToken, refreshToken, profile, done) => {
-      const user = {
-        id: profile.id,
-        name: profile.displayName,
-        email: profile.emails?.[0]?.value,
-      };
-
-      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "1d" });
-      done(null, { user, token });
-    }
-  )
+    const FRONTEND = process.env.FRONTEND_URL;
+    console.log("🔹 Redirecting to frontend with token");
+    res.redirect(`${FRONTEND}/dashboard?token=${req.user.token}`);
+  }
 );
 
-// === Routes ===
-app.use("/auth", authRoutes);
+// JWT-based /auth/me
+router.get("/me", (req, res) => {
+  const authHeader = req.headers.authorization;
+  console.log("🔹 Authorization header:", authHeader);
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
+  if (!authHeader) {
+    console.log("❌ No token provided");
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  console.log("🔹 Extracted token:", token);
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("✅ JWT decoded:", decoded);
+    res.json({ loggedIn: true, user: decoded });
+  } catch (err) {
+    console.log("❌ JWT verification failed:", err.message);
+    res.status(401).json({ error: "Invalid token" });
+  }
+});
+
+// Optional: logout route
+router.get("/logout", (req, res) => {
+  const FRONTEND = process.env.FRONTEND_URL;
+  console.log("🔹 Logging out user");
+  res.redirect(FRONTEND);
+});
+
+export default router;
