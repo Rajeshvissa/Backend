@@ -21,12 +21,24 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
+
+
+const FRONTEND = process.env.FRONTEND_URL;
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true, // allow cookies
+    origin: [FRONTEND], // allow only frontend
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Explicit preflight handling
+app.options("*", cors({
+  origin: [FRONTEND],
+  credentials: true,
+}));
 
 // --- Session ---
 app.use(
@@ -47,6 +59,7 @@ app.use(
 // --- Passport ---
 app.use(passport.initialize());
 app.use(passport.session());
+console.log(passport.session());
 
 // --- Routes ---
 app.use("/auth", authRoutes);
@@ -66,3 +79,4 @@ mongoose
 // --- Start Server ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
