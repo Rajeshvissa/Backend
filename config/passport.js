@@ -21,7 +21,15 @@ passport.use(
 );
 
 // Serialize user to session
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
+passport.serializeUser((user, done) => {
+  console.log("🔹 Serializing user:", user);
+  done(null, user);
+});
+
+passport.deserializeUser((obj, done) => {
+  console.log("🔹 Deserializing user from session:", obj);
+  done(null, obj);
+});
 
 export default passport;
+
