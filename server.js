@@ -147,11 +147,12 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      httpOnly: true,
-      sameSite: "lax",   // allows cookie across localhost:5000 ↔ 5173
-      secure: false,     // keep false on http; set true only behind HTTPS
-      maxAge: 24 * 60 * 60 * 1000,
-    },
+  httpOnly: true,
+  sameSite: "none",   // required for cross-site cookies
+  secure: true,       // required when using https (Render + Vercel use https)
+  maxAge: 24 * 60 * 60 * 1000,
+},
+
   })
 );
 
@@ -189,3 +190,4 @@ mongoose
 // ---- Start server ----
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
