@@ -12,25 +12,22 @@ router.get(
 // Google callback
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/auth/failure",
-    session: true,
-  }),
-  (req, res, next) => {
-    console.log("✅ Google login success. User:", req.user);
+  passport.authenticate("google", { failureRedirect: "/auth/failure", session: true }),
+  (req, res) => {
+    const FRONTEND = process.env.FRONTEND_URL;
+    console.log("✅ Google login success, user:", req.user);
 
-    // force session to save before redirect
-    req.session.save((err) => {
+    // Force session save before redirect
+    req.session.save(err => {
       if (err) {
-        console.error("❌ Error saving session:", err);
-        return next(err);
+        console.error("❌ Session save error:", err);
       }
-      console.log("✅ Session saved, redirecting...");
-      const FRONTEND = process.env.FRONTEND_URL;
+      console.log("✅ Session saved, redirecting to frontend...");
       res.redirect(`${FRONTEND}/dashboard`);
     });
   }
 );
+
 
 // Get logged-in user
 router.get("/me", (req, res) => {
@@ -59,3 +56,4 @@ router.get("/failure", (_req, res) => {
 });
 
 export default router;
+
