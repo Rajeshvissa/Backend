@@ -57,7 +57,7 @@ app.get(
 );
 
 // Example protected API route
-app.get("/api/profile", (req, res) => {
+app.get("/auth/api", (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: "No token provided" });
 
@@ -73,3 +73,4 @@ app.get("/api/profile", (req, res) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
+
