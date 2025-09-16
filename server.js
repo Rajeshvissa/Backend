@@ -1,33 +1,68 @@
 import express from "express";
-import passport from "./config/passport.js";
-import authRoutes from "./routes/auth.js";
-import cors from "cors";
-import session from "express-session";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
+import session from "express-session";
+import passport from "./config/passport.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+
+import authRoutes from "./routes/auth.js";
+import customerRoutes from "./routes/customerRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import campaignRoutes from "./routes/campaignRoutes.js";
+import vendorRoutes from "./routes/vendor.js";
+import receiptsRoutes from "./routes/receipts.js";
+import communicationRoutes from "./routes/communicationRoutes.js";
 
 dotenv.config();
 const app = express();
 
-// ---- Core middleware ----
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+// --- Middleware ---
+app.use(cookieParser());
 app.use(express.json());
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { httpOnly: true, sameSite: "none", secure: true, maxAge: 86400000 }
-}));
 
-// ---- Passport ----
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true, // allow cookies
+  })
+);
+
+// --- Session ---
+app.use(
+  session({
+    name: "connect.sid",
+    secret: process.env.SESSION_SECRET || "mini-crm-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "none",   // for cross-site cookies
+      secure: true,       // required on HTTPS
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  })
+);
+
+// --- Passport ---
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ---- Routes ----
+// --- Routes ---
 app.use("/auth", authRoutes);
+app.use("/customers", customerRoutes);
+app.use("/orders", orderRoutes);
+app.use("/api/campaigns", campaignRoutes);
+app.use("/api/vendor", vendorRoutes);
+app.use("/api/receipts", receiptsRoutes);
+app.use("/communication", communicationRoutes);
 
-// ---- Test route ----
-app.get("/", (_req, res) => res.send("Hello Render!"));
+// --- Database ---
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Error:", err));
 
-// ---- Start server ----
+// --- Start Server ---
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
