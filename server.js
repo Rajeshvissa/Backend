@@ -6,6 +6,14 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 
 // Trigger Google login
+console.log("Starting server...");
+console.log("GOOGLE_CLIENT_ID =", process.env.GOOGLE_CLIENT_ID);
+console.log("JWT_SECRET =", process.env.JWT_SECRET);
+console.log("FRONTEND_URL =", process.env.FRONTEND_URL);
+console.log("MONGO_URI =", process.env.MONGO_URI);
+console.log("SESSION_SECRET =", process.env.SESSION_SECRET);
+
+
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -55,4 +63,5 @@ router.get("/logout", (req, res) => {
 });
 
 export default router;
+
 
