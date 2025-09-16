@@ -12,28 +12,23 @@ router.get(
 
 // Google callback
 // Google callback - Add debug logging
+// Google callback with detailed token logging
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: process.env.FRONTEND_URL }),
+  passport.authenticate("google", { 
+    session: false, 
+    failureRedirect: `${process.env.FRONTEND_URL}/login` 
+  }),
   (req, res) => {
-    const FRONTEND = process.env.FRONTEND_URL;
+    console.log("🎯 Google OAuth Successful!");
+    console.log("👤 User object:", req.user);
+    console.log("🔑 Generated token:", req.user.token);
+    console.log("📏 Token length:", req.user.token.length);
+    console.log("📍 Redirecting to:", `${process.env.FRONTEND_URL}/dashboard?token=${req.user.token}`);
     
-    console.log("🔹 Google OAuth successful");
-    console.log("🔹 User object:", req.user);
-    console.log("🔹 Token being sent:", req.user.token);
-    
-    // Verify the token before sending it
-    try {
-      const decoded = jwt.verify(req.user.token, process.env.JWT_SECRET);
-      console.log("✅ Token is valid, payload:", decoded);
-    } catch (err) {
-      console.error("❌ Token verification failed:", err.message);
-    }
-    
-    res.redirect(`${FRONTEND}/dashboard?token=${req.user.token}`);
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard?token=${req.user.token}`);
   }
 );
-
 // JWT-based /auth/me
 // JWT-based /auth/me with detailed error logging
 router.get("/me", (req, res) => {
@@ -72,4 +67,5 @@ router.get("/me", (req, res) => {
 });
 
 export default router;
+
 
