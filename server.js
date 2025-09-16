@@ -41,20 +41,24 @@ app.use(
 // }));
 
 // --- Session ---
+
+app.set("trust proxy", 1);
+
 app.use(
   session({
-    name: "connect.sid",
-    secret: process.env.SESSION_SECRET || "mini-crm-secret",
+    secret: process.env.SESSION_SECRET || "secret",
     resave: false,
     saveUninitialized: false,
+    proxy: true, // important for HTTPS on Render
     cookie: {
+      secure: true,          // must be true on Render (HTTPS)
+      sameSite: "none",      // allow cross-site cookie
       httpOnly: true,
-      sameSite: "none",   // for cross-site cookies
-      secure: true,       // required on HTTPS
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     },
   })
 );
+
 
 // --- Passport ---
 app.use(passport.initialize());
@@ -79,5 +83,6 @@ mongoose
 // --- Start Server ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
 
 
