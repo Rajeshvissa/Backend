@@ -15,8 +15,8 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { session: false, failureRedirect: process.env.FRONTEND_URL }),
   (req, res) => {
-    // Redirect frontend with JWT
     const FRONTEND = process.env.FRONTEND_URL;
+    // send token in URL query
     res.redirect(`${FRONTEND}/dashboard?token=${req.user.token}`);
   }
 );
@@ -36,3 +36,4 @@ router.get("/me", (req, res) => {
 });
 
 export default router;
+
