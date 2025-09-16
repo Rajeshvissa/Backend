@@ -24,6 +24,7 @@ router.get("/me", (req, res) => {
   if (!req.user) {
     return res.status(401).json({ loggedIn: false });
   }
+  console.log(res.user);
   return res.json({ loggedIn: true, user: req.user });
 });
 
@@ -41,4 +42,5 @@ router.get("/logout", (req, res) => {
 });
 
 export default router;
+
 
