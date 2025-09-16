@@ -1,5 +1,6 @@
 import express from "express";
-import passport from "passport";
+import passport from "./config/passport.js";
+import authRoutes from "./routes/auth.js";
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
@@ -54,3 +55,4 @@ router.get("/logout", (req, res) => {
 });
 
 export default router;
+
